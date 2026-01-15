@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sebastián De Toma - Observatorio Terminal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #252d38;
+            --bg-secondary: #2f3844;
+            --text-primary: #e5e9f0;
+            --text-secondary: #b8c5d9;
+            --accent-cyan: #88c0d0;
+            --accent-purple: #b48ead;
+            --accent-orange: #d08770;
+            --accent-yellow: #ebcb8b;
+            --accent-green: #a3be8c;
+            --border-color: rgba(136, 192, 208, 0.2);
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Scanline effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.3;
+        }
+
+        /* Terminal container */
+        .terminal-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* Terminal header */
+        .terminal-header {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f57; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #28ca42; }
+
+        .terminal-title {
+            color: var(--text-secondary);
+            font-size: 12px;
+            margin-left: auto;
+        }
+
+        /* Terminal body */
+        .terminal-body {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 0 0 8px 8px;
+            padding: 30px;
+            min-height: 80vh;
+        }
+
+        /* Welcome section */
+        .welcome {
+            margin-bottom: 30px;
+            animation: fadeIn 1s ease;
+        }
+
+        .welcome h1 {
+            color: var(--accent-cyan);
+            font-size: 24px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
+        }
+
+        .welcome .subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .ascii-art {
+            color: var(--accent-purple);
+            font-size: 10px;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            opacity: 0.6;
+        }
+
+        /* Command prompt */
+        .prompt {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .prompt-symbol {
+            color: var(--accent-green);
+            margin-right: 10px;
+        }
+
+        .command-input {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            outline: none;
+            flex: 1;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background: var(--accent-cyan);
+            animation: blink 1s infinite;
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* Command suggestions */
+        .commands {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .cmd-btn {
+            background: rgba(0, 217, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--accent-cyan);
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .cmd-btn:hover {
+            background: rgba(0, 217, 255, 0.2);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(0, 217, 255, 0.3);
+        }
+
+        /* Output sections */
+        .output {
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        .output.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .section-title {
+            color: var(--accent-cyan);
+            font-size: 18px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .section-title::before {
+            content: '> ';
+            color: var(--accent-green);
+        }
+
+        /* Content cards */
+        .card {
+            background: rgba(26, 35, 50, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 4px 12px rgba(0, 217, 255, 0.1);
+        }
+
+        .card-title a {
+            transition: color 0.2s ease;
+        }
+
+        .card-title a:hover {
+            color: var(--accent-cyan);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .card-meta {
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        .card-content {
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.6;
+            font-family: 'Source Serif 4', serif;
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .tag {
+            background: rgba(183, 148, 246, 0.1);
+            border: 1px solid rgba(183, 148, 246, 0.3);
+            color: var(--accent-purple);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 10px;
+        }
+
+        /* Grid layouts */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        /* Stat boxes */
+        .stat-box {
+            background: rgba(0, 217, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            color: var(--accent-cyan);
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Links */
+        a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        a:hover {
+            color: var(--accent-purple);
+            text-shadow: 0 0 8px rgba(183, 148, 246, 0.5);
+        }
+
+        /* List styling */
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        ul li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(139, 149, 168, 0.1);
+        }
+
+        ul li::before {
+            content: '▹ ';
+            color: var(--accent-cyan);
+            margin-right: 10px;
+        }
+
+        /* Social links */
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 15px;
+            background: rgba(0, 217, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover {
+            background: rgba(0, 217, 255, 0.1);
+            border-color: var(--accent-cyan);
+        }
+
+        /* Lab section special styling */
+        .lab-item {
+            display: flex;
+            align-items: start;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(183, 148, 246, 0.05);
+            border: 1px solid rgba(183, 148, 246, 0.2);
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .lab-icon {
+            font-size: 24px;
+            opacity: 0.7;
+        }
+
+        .lab-content {
+            flex: 1;
+        }
+
+        .lab-title {
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .lab-desc {
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-family: 'Source Serif 4', serif;
+        }
+
+        /* Back button */
+        .back-btn {
+            background: rgba(255, 107, 53, 0.1);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            color: var(--accent-orange);
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            margin-bottom: 20px;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 107, 53, 0.2);
+            border-color: var(--accent-orange);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .terminal-body {
+                padding: 20px;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .commands {
+                flex-direction: column;
+            }
+
+            .cmd-btn {
+                width: 100%;
+            }
+        }
+
+        /* Typing animation */
+        .typing {
+            overflow: hidden;
+            white-space: nowrap;
+            animation: typing 2s steps(40, end);
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal-container">
+        <div class="terminal-header">
+            <div class="terminal-dots">
+                <div class="dot red"></div>
+                <div class="dot yellow"></div>
+                <div class="dot green"></div>
+            </div>
+            <div class="terminal-title">~/sebadetoma</div>
+        </div>
+
+        <div class="terminal-body">
+            <!-- Welcome section -->
+            <div class="welcome" id="welcome-section">
+                <div class="ascii-art">
+ _                /               _       _                      
+(_|              /               | |     | |                     
+  |   _  _    o /     _   _      | |  _  | |  __   _  _    __,  
+  |  / |/ |  | /     /  |/ |  |  |/  |/  |/  /  \_/ |/ |  /  |  
+  |_/  |  |_/|/\_/    \_/  |_/|_/|__/|__/|__/\__/   |  |_/\_/|_/
+                </div>
+                <h1 class="typing">~/sebadetoma</h1>
+                <p class="subtitle">Periodista · Investigador · Docente UBA</p>
+                <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 20px;">
+                    Editor SEO Regional | Investigador en IA y Periodismo | Docente UBA
+                </p>
+
+                <div class="commands">
+                    <button class="cmd-btn" onclick="executeCommand('about')">about</button>
+                    <button class="cmd-btn" onclick="executeCommand('work')">work</button>
+                    <button class="cmd-btn" onclick="executeCommand('research')">research</button>
+                    <button class="cmd-btn" onclick="executeCommand('lab')">lab</button>
+                    <button class="cmd-btn" onclick="executeCommand('feed')">feed</button>
+                    <button class="cmd-btn" onclick="executeCommand('contact')">contact</button>
+                    <button class="cmd-btn" onclick="executeCommand('help')">help</button>
+                </div>
+
+                <div class="prompt">
+                    <span class="prompt-symbol">❯</span>
+                    <input type="text" class="command-input" id="command-input" placeholder="escribe un comando o tu pregunta..." onkeypress="handleKeyPress(event)">
+                    <span class="cursor"></span>
+                </div>
+            </div>
+
+            <!-- Output sections -->
+            <div id="output-container"></div>
+        </div>
+    </div>
+
+    <script>
+        const commands = {
+            about: `
+                <div class="output active">
+                    <button class="back-btn" onclick="goBack()">← volver</button>
+                    <h2 class="section-title">Sobre mí</h2>
+                    
+                    <div class="card">
+                        <div class="card-content">
+                            <p style="margin-bottom: 15px;">
+                                Periodista especializado en tecnología y negocios con más de una década de experiencia. 
+                                Mi trabajo combina la práctica periodística diaria con la investigación académica sobre el 
+                                impacto de la inteligencia artificial en el ecosistema de medios.
+                            </p>
+                            <p style="margin-bottom: 15px;">
+                                Como Editor SEO Regional en El Cronista, coordino equipos en Argentina, España y Colombia, 
+                                desarrollando estrategias de contenido optimizado y sistemas de prompts de IA para equipos editoriales. 
+                                Fui editor de Revista Apertura y Revista Infotechnology, y he escrito en diversos medios como 
+                                La Nación, Forbes Argentina e iProup.
+                            </p>
+                            <p>
+                                Desde 2013 comparto mi experiencia como docente en la Universidad de Buenos Aires. También 
+                                conduzco eventos corporativos y paneles sobre tecnología. Fanático de Star Trek desde los 14 años, 
+                                autor de un libro de poesía, vivo en Buenos Aires con Julia y Sofía the cat.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="grid">
+                        <div class="stat-box">
+                            <div class="stat-number">13</div>
+                            <div class="stat-label">Años docencia</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number">3</div>
+                            <div class="stat-label">Países coordinados</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number">82%</div>
+                            <div class="stat-label">Adopción IA (estudio)</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number">179</div>
+                            <div class="stat-label">Libros Star Trek leídos</div>
+                        </div>
+                    </div>
+                </div>
+            `,
+
+            work: `
+                <div class="output active">
+                    <button class="back-btn" onclick="goBack()">← volver</button>
+                    <h2 class="section-title">Trabajo actual</h2>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">El Cronista</div>
+                                <div class="card-meta">Editor SEO Regional • 2016 - Presente</div>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <p>Editor SEO Regional coordinando equipos periodísticos en Argentina, España y Colombia. 
+                            Desarrollo de estrategias SEO, optimización de contenidos multiplataforma y sistemas de prompts de IA 
+                            para equipos editoriales. Fui editor de Revista Apertura, Revista Infotechnology, y de suplementos 
+                            y one shots de El Cronista.</p>
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">SEO</span>
+                            <span class="tag">IA</span>
+                            <span class="tag">Liderazgo</span>
+                            <span class="tag">Estrategia</span>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">Universidad de Buenos Aires</div>
+                                <div class="card-meta">Docente • 2013 - Presente</div>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <p>Docente en Publicidad y Políticas de la Convergencia. 
+                            Formación en estrategias digitales, nuevas tecnologías y IA aplicada al periodismo.</p>
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">Educación</span>
+                            <span class="tag">Marketing Digital</span>
+                            <span class="tag">Políticas Públicas</span>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">Más de lo esperado</div>
+                                <div class="card-meta">Integrante y co-conductor • 2020 - presente</div>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <p>Programa de radio sobre análisis y debate de tecnología, comunicación y cultura digital. 
+                            Conversaciones sobre las preguntas que importan más allá del ciclo de noticias.</p>
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">Radio</span>
+                            <span class="tag">Contenido</span>
+                            <span class="tag">Tecnología</span>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">Conducción de eventos</div>
+                                <div class="card-meta">Moderador & Speaker</div>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <p>Moderación de paneles (AMBA 360° 2025), eventos corporativos y conferencias 
+                            especializadas sobre tecnología, IA y transformación digital.</p>
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">Eventos</span>
+                            <span class="tag">Moderación</span>
+                            <span class="tag">Public Speaking</span>
+                        </div>
+                    </div>
+
+                    <p style="margin-top: 20px; font-size: 13px;">
+                        <a href="https://www.linkedin.com/in/juan-sebastian-de-toma/" target="_blank" style="color: var(--accent-cyan);">
+                            Ver perfil completo en LinkedIn →
+                        </a>
+                    </p>
+                </div>
+            `,
+
+            research: `
+                <div class="output active">
+                    <button class="back-btn" onclick="goBack()">← volver</button>
+                    <h2 class="section-title">Investigación académica</h2>
+                    
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">
+                                    Usos del ChatGPT en la prensa escrita de la Argentina
+                                    <a href="https://politicasconvergencia.com.ar/usos-del-chatgpt-en-la-prensa-escrita-de-argentina/" target="_blank" style="margin-left: 8px; color: var(--accent-cyan); text-decoration: none;">
+                                        🔗
+                                    </a>
+                                </div>
+                                <div class="card-meta">Investigación cualitativa • 2024</div>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <p>Estudio sobre uso de ChatGPT entre periodistas argentinos. Investigación realizada junto a Xavier Ibarreche, 
+                            Carolina Martínez Elebi y Martín Becerra en el marco de la cátedra Políticas de la Convergencia (UBA).</p>
+                            <ul style="margin-top: 10px;">
+                                <li>Adopción: 82.2% de los 107 periodistas encuestados utilizan ChatGPT</li>
+                                <li>Metodología: encuesta cuantitativa y análisis cualitativo</li>
+                                <li>Enfoque: transformaciones en rutinas profesionales, sesgos algorítmicos y supervisión humana</li>
+                                <li>77.5% de las redacciones no tienen normativas específicas sobre uso de IA</li>
+                            </ul>
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">IA</span>
+                            <span class="tag">Periodismo</span>
+                            <span class="tag">Investigación</span>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">
+                                    Medios y TIC en la Argentina
+                                    <a href="https://martinbecerra.wordpress.com/wp-content/uploads/2014/12/medios-y-tic-en-la-argentina-ubacyt-becerra-beltran-2014.pdf" target="_blank" style="margin-left: 8px; color: var(--accent-cyan); text-decoration: none;">
+                                        🔗
+                                    </a>
+                                </div>
+                                <div class="card-meta">Investigación UBACyT • 2014</div>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <p>Investigación sobre medios de comunicación y tecnologías de la información en Argentina. 
+                            Trabajo en equipo dirigido por Martín Becerra.</p>
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">Medios</span>
+                            <span class="tag">TIC</span>
+                            <span class="tag">UBACyT</span>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">
+                                    Sin fines de lucro con tecnologías y organización
+                                    <a href="https://politicasconvergencia.com.ar/nuevo-libro-sin-fines-de-lucro-con-tecnologias-y-organizacion/" target="_blank" style="margin-left: 8px; color: var(--accent-cyan); text-decoration: none;">
+                                        🔗
+                                    </a>
+                                </div>
+                                <div class="card-meta">Publicación académica</div>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <p>Contribución a publicación sobre organizaciones sin fines de lucro, tecnologías y formas organizativas.</p>
+                        </div>
+                        <div class="card-tags">
+                            <span class="tag">Tercer sector</span>
+                            <span class="tag">Tecnología</span>
+                            <span class="tag">Organización</span>
+                        </div>
+                    </div>
+                </div>
+            `,
+
+            lab: `
+                <div class="output active">
+                    <button class="back-btn" onclick="goBack()">← volver</button>
+                    <h2 class="section-title">El laboratorio</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 13px;">
+                        Herramientas, recursos y experimentos en progreso. Todo lo que comparto del proceso.
+                    </p>
+
+                    <div class="lab-item">
+                        <div class="lab-icon">🎯</div>
+                        <div class="lab-content">
+                            <div class="lab-title">Framework SEO para newsrooms</div>
+                            <div class="lab-desc">
+                                Metodología de optimización de contenidos periodísticos sin sacrificar calidad 
+                                editorial. Probado en equipos multinacionales.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lab-item">
+                        <div class="lab-icon">🤖</div>
+                        <div class="lab-content">
+                            <div class="lab-title">Sistema de prompts editoriales</div>
+                            <div class="lab-desc">
+                                Arquitectura de prompts de IA para diferentes tipos de artículos: tecnología, 
+                                mercados, entrevistas. Optimizados para equipos en Argentina, España y Colombia.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lab-item">
+                        <div class="lab-icon">📊</div>
+                        <div class="lab-content">
+                            <div class="lab-title">Dashboards interactivos</div>
+                            <div class="lab-desc">
+                                Visualización de datos en tiempo real para análisis de audiencias y performance 
+                                de contenidos en diferentes mercados.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lab-item">
+                        <div class="lab-icon">📝</div>
+                        <div class="lab-content">
+                            <div class="lab-title">Manuales de estilo con IA</div>
+                            <div class="lab-desc">
+                                Guías editoriales que integran uso de herramientas de IA manteniendo calidad 
+                                periodística y voz editorial coherente.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `,
+
+            feed: `
+                <div class="output active">
+                    <button class="back-btn" onclick="goBack()">← volver</button>
+                    <h2 class="section-title">Feed: señales captadas</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 13px;">
+                        Actividad reciente en el observatorio: artículos, publicaciones y transmisiones.
+                    </p>
+
+                    <div class="grid-2">
+                        <div>
+                            <h3 style="color: var(--accent-purple); font-size: 16px; margin-bottom: 15px;">
+                                📰 Últimos artículos
+                            </h3>
+                            
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title">
+                                        La provincia que baja impuestos para acelerar la fibra óptica
+                                        <a href="https://www.cronista.com/infotechnology/actualidad/la-provincia-que-baja-impuestos-para-acelerar-la-fibra-optica-y-atraer-us-15-millones-y-la-empresa-que-se-beneficio/" target="_blank" style="margin-left: 8px; color: var(--accent-cyan); text-decoration: none;">
+                                            🔗
+                                        </a>
+                                    </div>
+                                    <div class="card-meta">2026 · El Cronista</div>
+                                </div>
+                                <div class="card-content">
+                                    Internet Services invierte u$s 1,5 millones en Gualeguay con beneficios fiscales del RINI entrerriano. 
+                                    El modelo podría replicarse en otras provincias.
+                                </div>
+                                <div class="card-tags">
+                                    <span class="tag">Conectividad</span>
+                                    <span class="tag">Infraestructura</span>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title">
+                                        El libro argentino que usó la KGB para cifrar mensajes sobre la bomba atómica
+                                        <a href="https://www.cronista.com/informacion-gral/el-libro-argentino-que-uso-la-kgb-para-cifrar-mensajes-sobre-la-bomba-atomica/" target="_blank" style="margin-left: 8px; color: var(--accent-cyan); text-decoration: none;">
+                                            🔗
+                                        </a>
+                                    </div>
+                                    <div class="card-meta">2025 · El Cronista</div>
+                                </div>
+                                <div class="card-content">
+                                    Una novela de aventuras editada en Buenos Aires se convirtió en la clave para descifrar 
+                                    comunicaciones soviéticas durante la Guerra Fría.
+                                </div>
+                                <div class="card-tags">
+                                    <span class="tag">Historia</span>
+                                    <span class="tag">Criptografía</span>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title">
+                                        El Eternauta: la histórica batalla legal detrás del cómic argentino más famoso
+                                        <a href="https://www.cronista.com/informacion-gral/el-eternauta-la-historica-batalla-legal-detras-de-los-derechos-del-comic-argentino-mas-famoso/" target="_blank" style="margin-left: 8px; color: var(--accent-cyan); text-decoration: none;">
+                                            🔗
+                                        </a>
+                                    </div>
+                                    <div class="card-meta">2025 · El Cronista</div>
+                                </div>
+                                <div class="card-content">
+                                    Los conflictos por los derechos de autor de la obra maestra de Oesterheld y Solano López, 
+                                    entre herederos, editoriales y el Estado.
+                                </div>
+                                <div class="card-tags">
+                                    <span class="tag">Cultura</span>
+                                    <span class="tag">Propiedad intelectual</span>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title">
+                                        Operación Las Vegas: el negocio de las convenciones de fans de Star Trek
+                                        <a href="https://www.cronista.com/infotechnology/cultura-geek/operacion-las-vegas-una-mirada-al-negocio-de-las-convenciones-de-fans-de-star-trek/" target="_blank" style="margin-left: 8px; color: var(--accent-cyan); text-decoration: none;">
+                                            🔗
+                                        </a>
+                                    </div>
+                                    <div class="card-meta">2026 · El Cronista</div>
+                                </div>
+                                <div class="card-content">
+                                    Exploración del negocio de más de US$ 10.000 millones que pivotea entre la ficción y la realidad. 
+                                    Miles de fanáticos se reúnen cada año en Las Vegas.
+                                </div>
+                                <div class="card-tags">
+                                    <span class="tag">Cultura geek</span>
+                                    <span class="tag">Star Trek</span>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title">
+                                        Transhumanismo: la vida eterna cada vez más cerca
+                                        <a href="https://www.lanacion.com.ar/tecnologia/transhumanismo-vida-eterna-cada-vez-mas-cerca-nid2432072/" target="_blank" style="margin-left: 8px; color: var(--accent-cyan); text-decoration: none;">
+                                            🔗
+                                        </a>
+                                    </div>
+                                    <div class="card-meta">2020 · La Nación</div>
+                                </div>
+                                <div class="card-content">
+                                    Análisis sobre el movimiento transhumanista y las tecnologías que prometen extender 
+                                    radicalmente la vida humana.
+                                </div>
+                                <div class="card-tags">
+                                    <span class="tag">Tecnología</span>
+                                    <span class="tag">Futuro</span>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="card-title">
+                                        La guerra tibia a un click
+                                        <a href="https://revistag7.com/la-guerra-tibia-a-un-click/" target="_blank" style="margin-left: 8px; color: var(--accent-cyan); text-decoration: none;">
+                                            🔗
+                                        </a>
+                                    </div>
+                                    <div class="card-meta">Revista G7 (originalmente Anfibia)</div>
+                                </div>
+                                <div class="card-content">
+                                    Investigación sobre ciberguerra, desinformación y las nuevas formas de conflicto digital.
+                                </div>
+                                <div class="card-tags">
+                                    <span class="tag">Ciberseguridad</span>
+                                    <span class="tag">Geopolítica</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 style="color: var(--accent-cyan); font-size: 16px; margin-bottom: 15px;">
+                                📡 Newsletters
+                            </h3>
+                            
+                            <div class="card">
+                                <div class="card-title" style="margin-bottom: 10px;">
+                                    Alto tráfico
+                                    <a href="https://www.linkedin.com/newsletters/alto-tr%C3%A1fico-7378490678688858112/" target="_blank" style="margin-left: 8px; color: var(--accent-cyan); text-decoration: none;">
+                                        🔗
+                                    </a>
+                                </div>
+                                <div class="card-meta" style="margin-bottom: 10px;">LinkedIn Newsletter</div>
+                                <div class="card-content">
+                                    Newsletter bisemanal sobre innovación editorial, audiencias, SEO e IA.
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-title" style="margin-bottom: 10px;">
+                                    3 pensamientos
+                                    <a href="https://3pensamientos.substack.com/" target="_blank" style="margin-left: 8px; color: var(--accent-cyan); text-decoration: none;">
+                                        🔗
+                                    </a>
+                                </div>
+                                <div class="card-meta" style="margin-bottom: 10px;">Substack</div>
+                                <div class="card-content">
+                                    Reflexiones sobre tecnología, comunicación y cultura.
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-title" style="margin-bottom: 10px;">
+                                    Bajo y subrayado
+                                    <a href="https://bajoysubrayado.substack.com/" target="_blank" style="margin-left: 8px; color: var(--accent-cyan); text-decoration: none;">
+                                        🔗
+                                    </a>
+                                </div>
+                                <div class="card-meta" style="margin-bottom: 10px;">Substack</div>
+                                <div class="card-content">
+                                    Notas sobre lectura, literatura y libros.
+                                </div>
+                            </div>
+
+                            <h3 style="color: var(--accent-green); font-size: 16px; margin: 25px 0 15px 0;">
+                                📚 Leyendo ahora
+                            </h3>
+                            
+                            <ul style="font-size: 13px;">
+                                <li>"Historias de París" - Michel Onfray (37% leído)</li>
+                                <li>"The Spy in the Archive" - Gordon Corera (47% leído)</li>
+                                <li>"El sueño de Eichmann" - Michel Onfray (11% leído)</li>
+                                <li>"La máquina definitiva" - E.C. Osondu (11% leído)</li>
+                            </ul>
+                            <p style="font-size: 12px; margin-top: 10px;">
+                                <a href="https://www.goodreads.com/user/show/21116591-sebasti-n" target="_blank" style="color: var(--accent-cyan);">
+                                    Ver mi biblioteca completa en Goodreads →
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `,
+
+            contact: `
+                <div class="output active">
+                    <button class="back-btn" onclick="goBack()">← volver</button>
+                    <h2 class="section-title">Contacto</h2>
+                    
+                    <div class="card">
+                        <div class="card-content">
+                            <p style="margin-bottom: 20px;">
+                                ¿Interesado en colaborar, consultoría, moderación de eventos, charlas o creación de contenidos? 
+                                Conectemos.
+                            </p>
+                            
+                            <div style="margin-bottom: 20px;">
+                                <div style="color: var(--accent-cyan); margin-bottom: 10px;">📧 Email</div>
+                                <a href="mailto:sebadetoma@gmail.com">sebadetoma@gmail.com</a>
+                            </div>
+
+                            <div class="social-links">
+                                <a href="https://www.linkedin.com/in/juan-sebastian-de-toma" target="_blank" class="social-link">
+                                    <span>💼</span>
+                                    <span>LinkedIn</span>
+                                </a>
+                                <a href="https://www.instagram.com/sebadetoma/" target="_blank" class="social-link">
+                                    <span>📷</span>
+                                    <span>Instagram</span>
+                                </a>
+                                <a href="https://www.cronista.com/author/sebastian-de-toma/" target="_blank" class="social-link">
+                                    <span>📰</span>
+                                    <span>El Cronista</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title" style="margin-bottom: 15px;">Disponibilidad</div>
+                        <div class="card-content">
+                            <ul>
+                                <li>Moderación de paneles y eventos</li>
+                                <li>Charlas sobre IA, periodismo y transformación digital</li>
+                                <li>Consultoría en estrategia de contenidos y SEO</li>
+                                <li>Talleres de capacitación en IA para redacciones</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title" style="margin-bottom: 15px;">Ubicación</div>
+                        <div class="card-content">
+                            <p>📍 Buenos Aires, Argentina</p>
+                            <p style="color: var(--text-secondary); font-size: 12px; margin-top: 5px;">
+                                Trabajo remoto con equipos en Argentina, España y Colombia
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `,
+
+            help: `
+                <div class="output active">
+                    <button class="back-btn" onclick="goBack()">← volver</button>
+                    <h2 class="section-title">Comandos Disponibles</h2>
+                    
+                    <div class="card">
+                        <div class="card-content">
+                            <ul>
+                                <li><strong>about</strong> - Información sobre mí, trayectoria y formación</li>
+                                <li><strong>work</strong> - Trabajo actual: El Cronista, UBA, radio, eventos</li>
+                                <li><strong>research</strong> - Investigación académica sobre IA y periodismo</li>
+                                <li><strong>lab</strong> - El laboratorio: herramientas, recursos y experimentos</li>
+                                <li><strong>feed</strong> - Actividad reciente: artículos, newsletter, lecturas</li>
+                                <li><strong>contact</strong> - Información de contacto y redes sociales</li>
+                                <li><strong>help</strong> - Muestra esta ayuda</li>
+                                <li><strong>clear</strong> - Limpia la terminal</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title" style="margin-bottom: 15px;">Tips de Navegación</div>
+                        <div class="card-content">
+                            <p style="margin-bottom: 10px;">• Puedes escribir comandos o hacer clic en los botones</p>
+                            <p style="margin-bottom: 10px;">• Presiona Enter después de escribir un comando</p>
+                            <p>• Usa el botón "← volver" para regresar al inicio</p>
+                        </div>
+                    </div>
+                </div>
+            `
+        };
+
+        function executeCommand(cmd) {
+            const outputContainer = document.getElementById('output-container');
+            const welcomeSection = document.getElementById('welcome-section');
+            const commandInput = document.getElementById('command-input');
+
+            if (cmd === 'clear') {
+                outputContainer.innerHTML = '';
+                welcomeSection.style.display = 'block';
+                commandInput.value = '';
+                return;
+            }
+
+            if (commands[cmd]) {
+                welcomeSection.style.display = 'none';
+                outputContainer.innerHTML = commands[cmd];
+                commandInput.value = '';
+                window.scrollTo(0, 0);
+            } else {
+                outputContainer.innerHTML = `
+                    <div class="output active">
+                        <button class="back-btn" onclick="goBack()">← volver</button>
+                        <p style="color: var(--accent-orange);">
+                            Comando no reconocido: "${cmd}"
+                        </p>
+                        <p style="color: var(--text-secondary); margin-top: 10px;">
+                            Escribe "help" para ver los comandos disponibles.
+                        </p>
+                    </div>
+                `;
+                welcomeSection.style.display = 'none';
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                const input = document.getElementById('command-input').value.trim().toLowerCase();
+                if (input) {
+                    executeCommand(input);
+                }
+            }
+        }
+
+        function goBack() {
+            const outputContainer = document.getElementById('output-container');
+            const welcomeSection = document.getElementById('welcome-section');
+            outputContainer.innerHTML = '';
+            welcomeSection.style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        // Focus input on load
+        window.addEventListener('load', () => {
+            document.getElementById('command-input').focus();
+        });
+    </script>
+</body>
+</html>
