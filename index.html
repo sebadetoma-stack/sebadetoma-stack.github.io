@@ -269,7 +269,9 @@ layout: default
   <a href="{{ post.url }}" class="blog-item">
     <div class="blog-cat">{{ post.category | default: "Blog" }}</div>
     <div class="blog-titulo">{{ post.title }}</div>
-    <div class="blog-fecha">{{ post.date | date: "%-d de %B de %Y" }}</div>
+    <div class="blog-fecha">{% assign mes = page.date | date: "%-m" %}
+    {% assign meses = "enero,febrero,marzo,abril,mayo,junio,julio,agosto,septiembre,octubre,noviembre,diciembre" | split: "," %}
+    {{ page.date | date: "%-d" }} de {{ meses[mes | minus: 1] }} de {{ page.date | date: "%Y" }}</div>
   </a>
   {% endfor %}
 </div>
