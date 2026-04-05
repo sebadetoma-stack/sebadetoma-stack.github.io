@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% if page.title %}{{ page.title }} — {% endif %}Sebastián De Toma</title>
+  <meta name="description" content="{% if page.description %}{{ page.description }}{% else %}{{ site.description }}{% endif %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Source+Sans+3:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --papel: #fafaf8;
+      --tinta: #1a1a1a;
+      --tinta-suave: #333;
+      --tinta-media: #666;
+      --tinta-leve: #999;
+      --tinta-minima: #aaa;
+      --borde: #d8d4ce;
+      --borde-suave: #e8e5e0;
+      --rojo: #c00;
+      --serif: 'Playfair Display', Georgia, serif;
+      --sans: 'Source Sans 3', system-ui, sans-serif;
+    }
+
+    html { font-size: 16px; }
+
+    body {
+      background: #f0ece6;
+      font-family: var(--sans);
+      color: var(--tinta);
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+
+    .diario {
+      max-width: 860px;
+      margin: 0 auto;
+      background: var(--papel);
+      border: 0.5px solid var(--borde);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    /* CABECERA */
+    .cabecera {
+      border-bottom: 3px solid var(--tinta);
+      padding: 14px 24px;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      font-family: var(--serif);
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--tinta);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    nav { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
+
+    nav a {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--tinta-media);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+
+    nav a:hover, nav a.activo { color: var(--rojo); }
+
+    /* DATELINE */
+    .dateline {
+      border-bottom: 0.5px solid var(--borde);
+      padding: 5px 24px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .dateline span {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--tinta-leve);
+    }
+
+    /* CONTENIDO */
+    .contenido { min-height: 300px; }
+
+    /* PIE */
+    .pie {
+      border-top: 0.5px solid var(--borde);
+      padding: 11px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pie-izq {
+      font-family: var(--serif);
+      font-size: 11px;
+      font-style: italic;
+      color: var(--tinta-leve);
+    }
+
+    .pie-redes { display: flex; gap: 16px; }
+
+    .pie-redes a {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--tinta-media);
+      text-decoration: none;
+    }
+
+    .pie-redes a:hover { color: var(--tinta); }
+
+    .pie-contacto a {
+      font-size: 10px;
+      color: var(--rojo);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+    }
+
+    .pie-contacto a:hover { text-decoration: underline; }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      body { padding: 0; }
+      .diario { border-left: none; border-right: none; box-shadow: none; }
+      .cabecera { padding: 12px 16px; }
+      .dateline { padding-left: 16px; padding-right: 16px; }
+    }
+  </style>
+  {% seo %}
+</head>
+<body>
+
+<div class="diario">
+
+  <header class="cabecera">
+    <a href="/" class="logo">Sebastián De Toma</a>
+    <nav>
+      <a href="/trabajo" {% if page.url contains '/trabajo' %}class="activo"{% endif %}>trabajo</a>
+      <a href="/investigacion" {% if page.url contains '/investigacion' %}class="activo"{% endif %}>investigación</a>
+      <a href="/blog" {% if page.url contains '/blog' %}class="activo"{% endif %}>blog</a>
+      <a href="/escritura" {% if page.url contains '/escritura' %}class="activo"{% endif %}>escritura</a>
+      <a href="/contacto" {% if page.url contains '/contacto' %}class="activo"{% endif %}>contacto</a>
+    </nav>
+  </header>
+
+  <div class="dateline">
+    <span>Buenos Aires, Argentina</span>
+    <span>Periodismo · IA · Docencia · Radio</span>
+  </div>
+
+  <div class="contenido">
+    {{ content }}
+  </div>
+
+  <footer class="pie">
+    <span class="pie-izq">Buenos Aires · sebadetoma-stack.github.io</span>
+    <div class="pie-redes">
+      <a href="https://linkedin.com/in/sebastiandetoma" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="https://instagram.com/sebadetoma" target="_blank" rel="noopener">Instagram</a>
+      <a href="https://bsky.app/profile/sebadetoma.bsky.social" target="_blank" rel="noopener">Bluesky</a>
+    </div>
+    <div class="pie-contacto"><a href="mailto:hola@sebadetoma.com">contacto →</a></div>
+  </footer>
+
+</div>
+
+</body>
+</html>
