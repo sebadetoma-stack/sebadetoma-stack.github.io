@@ -1,0 +1,276 @@
+---
+layout: default
+---
+<style>
+  .hero {
+    padding: 24px 24px 0;
+    border-bottom: 0.5px solid var(--borde);
+  }
+
+  .kicker {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--rojo);
+    margin-bottom: 8px;
+  }
+
+  .titular {
+    font-family: var(--serif);
+    font-size: clamp(22px, 3.5vw, 30px);
+    font-weight: 400;
+    line-height: 1.15;
+    color: var(--tinta);
+    margin-bottom: 10px;
+    max-width: 580px;
+  }
+
+  .bajada {
+    font-family: var(--serif);
+    font-size: 14px;
+    font-style: italic;
+    color: #555;
+    line-height: 1.65;
+    margin-bottom: 18px;
+    max-width: 540px;
+  }
+
+  .franja {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 0.5px solid var(--borde);
+    margin: 0 -24px;
+  }
+
+  .stat {
+    padding: 14px 16px;
+    border-right: 0.5px solid var(--borde);
+    text-align: center;
+  }
+
+  .stat:last-child { border-right: none; }
+
+  .stat-num {
+    font-family: var(--serif);
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--tinta);
+    line-height: 1;
+    margin-bottom: 5px;
+  }
+
+  .stat-desc {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--tinta-leve);
+    line-height: 1.4;
+  }
+
+  .cuerpo {
+    display: grid;
+    grid-template-columns: 3fr 1px 2fr;
+    border-bottom: 0.5px solid var(--borde);
+  }
+
+  .col-principal { padding: 18px 24px; }
+  .col-divisor { background: var(--borde); margin: 14px 0; }
+  .col-lateral { padding: 18px 24px; }
+
+  .cuerpo-texto {
+    font-family: var(--serif);
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--tinta-suave);
+  }
+
+  .cuerpo-texto p { margin-bottom: 12px; }
+  .cuerpo-texto p:last-child { margin-bottom: 0; }
+
+  .lateral-titulo {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--rojo);
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--rojo);
+  }
+
+  .lateral-item {
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 0.5px solid var(--borde-suave);
+  }
+
+  .lateral-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+  .lateral-cat {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--tinta-leve);
+    margin-bottom: 3px;
+  }
+
+  .lateral-texto {
+    font-family: var(--serif);
+    font-size: 12px;
+    color: var(--tinta);
+    line-height: 1.45;
+  }
+
+  .blog-header {
+    padding: 8px 24px;
+    border-bottom: 0.5px solid var(--borde);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .blog-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--tinta);
+    font-weight: 500;
+  }
+
+  .blog-ver-todo {
+    font-size: 9px;
+    color: var(--rojo);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+  }
+
+  .blog-ver-todo:hover { text-decoration: underline; }
+
+  .blog-grilla {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-bottom: 0.5px solid var(--borde);
+  }
+
+  .blog-item {
+    padding: 14px 24px;
+    border-right: 0.5px solid var(--borde);
+    text-decoration: none;
+    display: block;
+    transition: background 0.1s;
+  }
+
+  .blog-item:hover { background: #f5f2ee; }
+  .blog-item:last-child { border-right: none; }
+
+  .blog-cat {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--rojo);
+    margin-bottom: 5px;
+  }
+
+  .blog-titulo {
+    font-family: var(--serif);
+    font-size: 13px;
+    color: var(--tinta);
+    line-height: 1.4;
+    margin-bottom: 6px;
+  }
+
+  .blog-fecha {
+    font-size: 9px;
+    color: var(--tinta-minima);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .hero, .col-principal, .col-lateral,
+    .blog-header, .blog-item { padding-left: 16px; padding-right: 16px; }
+
+    .franja { grid-template-columns: repeat(2, 1fr); }
+    .stat:nth-child(2) { border-right: none; }
+    .stat:nth-child(3), .stat:nth-child(4) { border-top: 0.5px solid var(--borde); }
+    .stat:nth-child(4) { border-right: none; }
+
+    .cuerpo { grid-template-columns: 1fr; }
+    .col-divisor { display: none; }
+    .col-lateral { border-top: 0.5px solid var(--borde); padding-top: 16px; }
+
+    .blog-grilla { grid-template-columns: 1fr; }
+    .blog-item { border-right: none; border-bottom: 0.5px solid var(--borde); }
+    .blog-item:last-child { border-bottom: none; }
+  }
+</style>
+
+<section class="hero">
+  <div class="kicker">Editor · Investigador · Docente · Poeta</div>
+  <h1 class="titular">Trabajo en la intersección entre medios, tecnología y lo que todavía no tiene nombre</h1>
+  <p class="bajada">Editor SEO Regional en El Cronista. Investigo cómo la IA entra en las redacciones. Doy clases en la UBA desde 2013. Escribo cuando puedo sobre lo que pienso.</p>
+
+  <div class="franja">
+    <div class="stat">
+      <div class="stat-num">10</div>
+      <div class="stat-desc">años en El Cronista</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">3</div>
+      <div class="stat-desc">países coordinados</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">107</div>
+      <div class="stat-desc">periodistas encuestados</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">∞</div>
+      <div class="stat-desc">preguntas abiertas</div>
+    </div>
+  </div>
+</section>
+
+<div class="cuerpo">
+  <div class="col-principal">
+    <div class="cuerpo-texto">
+      <p>Coordino equipos editoriales en Argentina, España y Colombia desde El Cronista, donde también desarrollo sistemas de prompts de IA para redacciones. Antes fui editor en Revista Apertura y Revista Infotechnology, y escribí en La Nación, Forbes Argentina e iProup.</p>
+      <p>En paralelo, investigo cómo los periodistas adoptan herramientas de IA sin que nadie se lo pida formalmente. El 82,2% de los 107 que encuestamos ya usaba ChatGPT. El 77,5% trabajaba en redacciones sin ninguna normativa al respecto.</p>
+      <p>Doy clases en la UBA, conduzco el programa de radio "Más de lo Esperado" y conduzco eventos corporativos sobre tecnología. Tengo un libro de poesía publicado y una antología de cuentos en proceso.</p>
+    </div>
+  </div>
+  <div class="col-divisor"></div>
+  <div class="col-lateral">
+    <div class="lateral-titulo">Ahora mismo</div>
+    <div class="lateral-item">
+      <div class="lateral-cat">El Cronista</div>
+      <div class="lateral-texto">Editor SEO Regional — Argentina, España y Colombia</div>
+    </div>
+    <div class="lateral-item">
+      <div class="lateral-cat">UBA</div>
+      <div class="lateral-texto">Docente — Marketing Digital, Publicidad, Políticas de la Convergencia</div>
+    </div>
+    <div class="lateral-item">
+      <div class="lateral-cat">Radio</div>
+      <div class="lateral-texto">"Más de lo Esperado" — programa propio</div>
+    </div>
+    <div class="lateral-item">
+      <div class="lateral-cat">Newsletter</div>
+      <div class="lateral-texto">Alto Tráfico — en LinkedIn</div>
+    </div>
+  </div>
+</div>
+
+{% if site.posts.size > 0 %}
+<div class="blog-header">
+  <span class="blog-label">Últimas del blog</span>
+  <a href="/blog" class="blog-ver-todo">ver todo →</a>
+</div>
+
+<div class="blog-grilla">
+  {% for post in site.posts limit:3 %}
+  <a href="{{ post.url }}" class="blog-item">
+    <div class="blog-cat">{{ post.category | default: "Blog" }}</div>
+    <div class="blog-titulo">{{ post.title }}</div>
+    <div class="blog-fecha">{{ post.date | date: "%-d de %B de %Y" }}</div>
+  </a>
+  {% endfor %}
+</div>
+{% endif %}

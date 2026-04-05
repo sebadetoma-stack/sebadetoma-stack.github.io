@@ -1,0 +1,36 @@
+title: Sebastián De Toma
+description: Periodista, investigador y docente. Editor SEO Regional en El Cronista. Investigo cómo la IA entra en las redacciones. Docente en la UBA desde 2013.
+url: "https://sebadetoma-stack.github.io"
+baseurl: ""
+
+author:
+  name: Sebastián De Toma
+  email: hola@sebadetoma.com
+
+# Configuración de posts
+permalink: /blog/:year/:month/:day/:title/
+paginate: 10
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+# Excluir de la build
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - node_modules
+
+# Colecciones
+collections:
+  posts:
+    output: true
+
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post

@@ -1,0 +1,111 @@
+---
+layout: default
+title: Blog
+permalink: /blog/
+---
+<style>
+  .blog-page-header {
+    padding: 20px 24px;
+    border-bottom: 0.5px solid var(--borde);
+  }
+
+  .blog-page-kicker {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--rojo);
+    margin-bottom: 6px;
+  }
+
+  .blog-page-titulo {
+    font-family: var(--serif);
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--tinta);
+  }
+
+  .blog-lista { padding: 0; }
+
+  .blog-lista-item {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    border-bottom: 0.5px solid var(--borde);
+    text-decoration: none;
+    transition: background 0.1s;
+  }
+
+  .blog-lista-item:hover { background: #f5f2ee; }
+
+  .blog-lista-fecha {
+    padding: 16px 16px 16px 24px;
+    font-size: 10px;
+    color: var(--tinta-leve);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    line-height: 1.4;
+    border-right: 0.5px solid var(--borde);
+  }
+
+  .blog-lista-texto { padding: 16px 24px; }
+
+  .blog-lista-cat {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--rojo);
+    margin-bottom: 4px;
+  }
+
+  .blog-lista-titulo {
+    font-family: var(--serif);
+    font-size: 15px;
+    color: var(--tinta);
+    line-height: 1.4;
+    margin-bottom: 5px;
+  }
+
+  .blog-lista-extracto {
+    font-size: 12px;
+    color: var(--tinta-media);
+    line-height: 1.5;
+  }
+
+  .blog-vacio {
+    padding: 40px 24px;
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--tinta-leve);
+    font-size: 14px;
+  }
+
+  @media (max-width: 600px) {
+    .blog-page-header { padding-left: 16px; padding-right: 16px; }
+    .blog-lista-item { grid-template-columns: 1fr; }
+    .blog-lista-fecha { border-right: none; border-bottom: 0.5px solid var(--borde-suave); padding: 12px 16px 8px; }
+    .blog-lista-texto { padding: 8px 16px 16px; }
+  }
+</style>
+
+<div class="blog-page-header">
+  <div class="blog-page-kicker">Archivo</div>
+  <h1 class="blog-page-titulo">Blog</h1>
+</div>
+
+<div class="blog-lista">
+  {% if site.posts.size > 0 %}
+    {% for post in site.posts %}
+    <a href="{{ post.url }}" class="blog-lista-item">
+      <div class="blog-lista-fecha">{{ post.date | date: "%b %Y" }}</div>
+      <div class="blog-lista-texto">
+        <div class="blog-lista-cat">{{ post.category | default: "Blog" }}</div>
+        <div class="blog-lista-titulo">{{ post.title }}</div>
+        {% if post.excerpt %}
+        <div class="blog-lista-extracto">{{ post.excerpt | strip_html | truncate: 120 }}</div>
+        {% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  {% else %}
+    <div class="blog-vacio">Todavía no hay posts. Pronto.</div>
+  {% endif %}
+</div>
