@@ -115,7 +115,9 @@ layout: default
   <div class="post-kicker">{{ page.category | default: "Blog" }}</div>
   <h1 class="post-titulo">{{ page.title }}</h1>
   <div class="post-meta">
-    {{ page.date | date: "%-d de %B de %Y" }}
+    {% assign mes = page.date | date: "%-m" %}
+    {% assign meses = "enero,febrero,marzo,abril,mayo,junio,julio,agosto,septiembre,octubre,noviembre,diciembre" | split: "," %}
+    {{ page.date | date: "%-d" }} de {{ meses[mes | minus: 1] }} de {{ page.date | date: "%Y" }}
     {% if page.author %} · {{ page.author }}{% endif %}
   </div>
 </div>
