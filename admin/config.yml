@@ -1,0 +1,30 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "assets/img"
+public_folder: "/assets/img"
+
+locale: es
+
+collections:
+  - name: "posts"
+    label: "Blog"
+    folder: "_posts"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - { label: "Título", name: "title", widget: "string" }
+      - { label: "Fecha", name: "date", widget: "datetime", format: "YYYY-MM-DD", date_format: "DD/MM/YYYY", time_format: false }
+      - label: "Categoría"
+        name: "category"
+        widget: "select"
+        options:
+          - { label: "Blog", value: "Blog" }
+          - { label: "Investigación", value: "Investigación" }
+          - { label: "Docencia", value: "Docencia" }
+          - { label: "IA y periodismo", value: "IA y periodismo" }
+          - { label: "Escritura", value: "Escritura" }
+          - { label: "Radio", value: "Radio" }
+      - { label: "Extracto", name: "excerpt", widget: "string", required: false, hint: "Resumen breve para el listado. Si no lo completás, se toma el primer párrafo." }
+      - { label: "Contenido", name: "body", widget: "markdown" }
