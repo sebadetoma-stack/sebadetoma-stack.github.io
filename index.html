@@ -269,9 +269,7 @@ layout: default
   <a href="{{ post.url }}" class="blog-item">
     <div class="blog-cat">{{ post.category | default: "Blog" }}</div>
     <div class="blog-titulo">{{ post.title }}</div>
-    <div class="blog-fecha">{% assign mes = page.date | date: "%-m" %}
-    {% assign meses = "enero,febrero,marzo,abril,mayo,junio,julio,agosto,septiembre,octubre,noviembre,diciembre" | split: "," %}
-    {{ page.date | date: "%-d" }} de {{ meses[mes | minus: 1] }} de {{ page.date | date: "%Y" }}</div>
+    {% assign nmes = post.date | date: "%-m" | to_i | minus: 1 %}{% assign meses = "enero,febrero,marzo,abril,mayo,junio,julio,agosto,septiembre,octubre,noviembre,diciembre" | split: "," %}<div class="blog-fecha">{{ post.date | date: "%-d" }} de {{ meses[nmes] }} de {{ post.date | date: "%Y" }}</div>
   </a>
   {% endfor %}
 </div>
