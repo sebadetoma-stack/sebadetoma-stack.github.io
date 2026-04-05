@@ -11,7 +11,6 @@ author:
 permalink: /blog/:year/:month/:day/:title/
 paginate: 10
 
-lang: es
 # Plugins
 plugins:
   - jekyll-feed
